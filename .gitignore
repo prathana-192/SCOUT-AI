@@ -1,0 +1,13 @@
+# Environment Variables
+.env
+.streamlit/secrets.toml
+
+# Local Database
+db/camping.db
+
+# Vector Store
+faiss_index/
+
+# Python Cache files
+__pycache__/
+*.pyc

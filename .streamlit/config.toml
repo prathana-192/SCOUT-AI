@@ -1,0 +1,19 @@
+[theme]
+# Primary accent color (Buttons, active states) - Gold/Orange from logo
+primaryColor = "#E69F00"
+
+# Background color of the main content area
+backgroundColor = "#FFFFFF"
+
+# Background color of the sidebar - Very light, distinct mint green
+secondaryBackgroundColor = "#F0F7F4"
+
+# Text color - Dark Green for high readability
+textColor = "#1B4D3E"
+
+# Font family - "sans serif" looks modern and clean
+font = "sans serif"
+
+[server]
+# Removing the setting that caused the warning
+headless = true

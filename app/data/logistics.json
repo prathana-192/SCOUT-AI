@@ -1,0 +1,76 @@
+{
+  "destinations": {
+    "coorg": {
+      "display_name": "Coorg (The Scotland of India)",
+      "policy_summary": "Cancellation: 90% refund if >7 days. No refund <48 hrs. Alcohol prohibited on treks.",
+      "food_summary": "Breakfast: Idli/Vada. Lunch: Lemon Rice. Dinner: Chicken Curry/Veg Sabzi.",
+      "modules": {
+        "module_combo": { 
+            "name": "3-Day Full Adventure Pack", 
+            "price": 6500, 
+            "type": "Package",
+            "capacity": 10,
+            "itinerary": "Complete 3-Day Plan: Kumara Parvatha Trek + Tadiandamol Camp + Dubare Rafting."
+        },
+        "module a": { 
+            "name": "Kumara Parvatha Trek", 
+            "price": 3800, 
+            "type": "Trekking",
+            "capacity": 20,
+            "itinerary": "Day 1: Reach Kukke, Trek to Bhattara Mane. Day 2: Summit Pushpagiri & Descent."
+        },
+        "module b": { 
+            "name": "Tadiandamol Leisure Camp", 
+            "price": 2500, 
+            "type": "Camping",
+            "capacity": 15,
+            "itinerary": "Day 1: Jeep ride to base, easy hike to peak. Evening Bonfire & Coorgi Dinner."
+        }
+      }
+    },
+    "wayanad": {
+      "display_name": "Wayanad (Caves & Mist)",
+      "policy_summary": "Plastic-free zone. No alcohol in forest camps.",
+      "food_summary": "Kerala Style: Puttu/Kadala for breakfast. Sadya style lunch.",
+      "modules": {
+        "module_combo": { 
+            "name": "3-Day Wayanad Explorer", 
+            "price": 5000, 
+            "type": "Package",
+            "capacity": 10,
+            "itinerary": "Complete Plan: Chembra Hike + Glass Bridge Glamping + Edakkal Caves."
+        },
+        "module a": { 
+            "name": "Chembra Peak Hike", 
+            "price": 1100, 
+            "type": "Hiking",
+            "capacity": 40,
+            "itinerary": "Day Trip: Report at 7 AM. Hike to Heart Lake. Return by 2 PM."
+        },
+        "module b": { 
+            "name": "900 Kandi Glass Bridge", 
+            "price": 2200, 
+            "type": "Glamping",
+            "capacity": 10,
+            "itinerary": "Off-road Jeep ride, Tent stay on cliff edge, Night Music & Campfire."
+        }
+      }
+    },
+    "kodaikanal": {
+      "display_name": "Kodaikanal (Princess of Hills)",
+      "policy_summary": "Forest permit required for Berijam. No loud music after 10 PM.",
+      "food_summary": "South Indian Tiffin (Dosa/Idli). Hot Badam Milk at night.",
+      "modules": {
+        "module_combo": { 
+            "name": "3-Day Vibe Package", 
+            "price": 2000, 
+            "type": "Package",
+            "capacity": 15,
+            "itinerary": "Complete Plan: Dolphin's Nose Trek + Cloud Farm Glamping + Lake Cycling."
+        },
+        "module a": { "name": "Dolphin's Nose Trek", "price": 0, "type": "Hiking", "capacity": 100, "itinerary": "Self-guided trek through pine forests." },
+        "module b": { "name": "Cloud Farm Glamping", "price": 1500, "type": "Glamping", "capacity": 12, "itinerary": "Private tents with western toilets. Sunset view." }
+      }
+    }
+  }
+}
