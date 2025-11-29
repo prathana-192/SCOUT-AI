@@ -4,6 +4,7 @@ langchain-community
 langchain-core
 langchain-groq
 langchain-huggingface
+langchain-text-splitters  
 fastembed
 pypdf
 python-dotenv
