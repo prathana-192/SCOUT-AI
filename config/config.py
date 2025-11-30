@@ -18,5 +18,9 @@ DB_PATH = os.path.join(BASE_DIR, "db", "camping.db")
 PDF_PATH = os.path.join(BASE_DIR, "docs", "Camping_Guide.pdf")
 VECTOR_DB_PATH = os.path.join(BASE_DIR, "faiss_index")
 
-SENDER_EMAIL = " prathanasharma19203@gmail.com"
-SENDER_PASSWORD = "cinx yifk daph bjpp"
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+
+# 5. SUPABASE CREDENTIALS
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
