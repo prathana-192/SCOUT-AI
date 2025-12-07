@@ -45,7 +45,7 @@ def initialize_knowledge_base():
     vector_store.save_local(config.VECTOR_DB_PATH)
     print(" Knowledge Base Built!")
 
-# 3. ADD USER PDF (Same as before)
+# 3. ADD USER PDF 
 def add_user_pdf_to_db(uploaded_file):
     try:
         temp_path = f"temp_{uploaded_file.name}"
@@ -113,14 +113,13 @@ def query_rag(query_text, chat_history=[]):
 
     try:
         # A. REWRITE QUERY (The Fix)
-        # We search the PDF using the "Smart Query", not the "Lazy User Query"
         search_query = rewrite_query(query_text, chat_history)
-        print(f"🔍 Searching PDF for: '{search_query}'") # Debug print to see it working
+        print(f"🔍 Searching PDF for: '{search_query}'") 
 
         # B. Retrieve Context
         embeddings = get_embedding_model()
         vector_store = FAISS.load_local(config.VECTOR_DB_PATH, embeddings, allow_dangerous_deserialization=True)
-        docs = vector_store.similarity_search(search_query, k=3) # Use search_query here!
+        docs = vector_store.similarity_search(search_query, k=3) 
         context_text = "\n\n".join([doc.page_content for doc in docs])
 
         # C. Generate Answer

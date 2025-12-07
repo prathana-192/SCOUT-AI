@@ -232,11 +232,16 @@ def verify_booking_from_pdf(uploaded_file):
         full_text = "\n".join([p.page_content for p in pages])
         os.remove(temp_path) 
         
+        booking_id = None
         # 3. Find Booking ID
-        match = re.search(r"Booking ID\D+#(\d+)", full_text, re.IGNORECASE)
+        match = re.search(r"Booking\s*ID.*?#\s*(\d+)", full_text, re.IGNORECASE | re.DOTALL)
         
         if not match:
-            return False, None, "Could not find a valid 'Booking ID: #...' in this document."
+            # Fallback: Sometimes PDFs extract as "Booking ID: 22" (No hash)
+            match = re.search(r"Booking\s*ID[^\d]+(\d+)", full_text, re.IGNORECASE | re.DOTALL)
+
+        if not match:
+            return False, None, "Could not find 'Booking ID' followed by a number in this document."
             
         booking_id = int(match.group(1))
         
@@ -299,7 +304,8 @@ def update_booking_details(booking_id, new_date, new_guests, new_total):
     try:
         update_data = {
             "booking_date": new_date, # Assuming simple string update
-            "guest_count": new_guests
+            "guest_count": new_guests,
+            "total_cost": new_total
         }
         
         supabase.table("bookings").update(update_data).eq("id", booking_id).execute()

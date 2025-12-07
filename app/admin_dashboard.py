@@ -10,7 +10,6 @@ import config.config as config
 import rag_pipeline as rag 
 
 # --- INITIALIZE SUPABASE ---
-# This replaces get_db_connection()
 try:
     supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
 except Exception as e:
@@ -43,15 +42,11 @@ def update_booking_status(booking_id, new_status):
 def show_admin_panel():
     st.title("Admin Dashboard")
     
-    # --- 1. FETCH DATA (Replaces SQL Queries) ---
-    # We fetch raw tables and join them in Python (easier than Supabase Joins)
+    # --- 1. FETCH DATA  ---
     df_bookings = load_table_data("bookings")
     df_customers = load_table_data("customers")
     
-    # Pre-process: Join Customer Info into Bookings
     if not df_bookings.empty and not df_customers.empty:
-        # Merge bookings with customers on customer_id
-        # Supabase returns columns as lowercase, ensure your DB columns match
         df_full = pd.merge(
             df_bookings, 
             df_customers[['id', 'name', 'email']], 
@@ -60,7 +55,7 @@ def show_admin_panel():
             how='left',
             suffixes=('', '_cust')
         )
-        # Rename for the UI
+        
         df_full.rename(columns={
             'id': 'Booking_ID',
             'name': 'Customer',
@@ -79,10 +74,10 @@ def show_admin_panel():
     # --- 2. GLOBAL METRICS ---
     total_bookings = len(df_full)
     
-    # Calculate Revenue (Sum Cost where Status is not Cancelled)
+    # Calculate Revenue 
     total_revenue = 0
     if not df_full.empty and 'Cost' in df_full.columns:
-        # Convert to numeric just in case
+        
         df_full['Cost'] = pd.to_numeric(df_full['Cost'], errors='coerce').fillna(0)
         total_revenue = df_full[df_full['Status'] != 'Cancelled']['Cost'].sum()
         
@@ -99,9 +94,9 @@ def show_admin_panel():
     # --- MAIN TABS ---
     tab1, tab2, tab3, tab4 = st.tabs(["Bookings Management", "Analytics", "Customer Data", "Knowledge Base"])
 
-    # ==========================================
-    # TAB 1: BOOKINGS (Filters + Table + Actions)
-    # ==========================================
+   
+    # TAB 1: BOOKINGS 
+    
     with tab1:
         st.subheader("Manage Bookings")
         
@@ -111,7 +106,7 @@ def show_admin_panel():
             with f1:
                 status_filter = st.selectbox("Filter by Status", ["All", "Confirmed", "Completed", "Cancelled"])
             with f2:
-                # Dynamic Location Filter
+                
                 if not df_full.empty and 'Destination' in df_full.columns:
                     locations = ["All"] + df_full['Destination'].unique().tolist()
                 else:
@@ -120,7 +115,7 @@ def show_admin_panel():
             with f3:
                 search_term = st.text_input("Search Name/ID", placeholder="Type name...")
 
-        # 2. APPLY FILTERS (Pandas Logic instead of SQL WHERE)
+        # 2. APPLY FILTERS 
         if not df_full.empty:
             df_view = df_full.copy()
 
@@ -131,21 +126,21 @@ def show_admin_panel():
                 df_view = df_view[df_view['Destination'] == location_filter]
                 
             if search_term:
-                # Search in Name or ID
+            
                 s_term = search_term.lower()
                 df_view = df_view[
                     df_view['Customer'].str.lower().str.contains(s_term, na=False) | 
                     df_view['Booking_ID'].astype(str).str.contains(s_term)
                 ]
 
-            # Sort by Date
+            
             if 'Booked_On' in df_view.columns:
                 df_view = df_view.sort_values(by='Booked_On', ascending=False)
 
             # 3. DISPLAY TABLE
-            # Select specific columns to display cleanly
+            
             cols_to_show = ['Booking_ID', 'Customer', 'Email', 'Destination', 'Module', 'Date', 'Guests', 'Cost', 'Status']
-            # Only show columns that exist (safety check)
+            
             cols_to_show = [c for c in cols_to_show if c in df_view.columns]
             
             st.dataframe(df_view[cols_to_show], use_container_width=True, hide_index=True)
@@ -157,7 +152,7 @@ def show_admin_panel():
             ac1, ac2, ac3 = st.columns([1, 2, 1])
             
             with ac1:
-                # Smart Dropdown
+                
                 available_ids = df_view['Booking_ID'].tolist()
                 selected_id = st.selectbox("Select Booking ID", available_ids)
             
@@ -179,14 +174,14 @@ def show_admin_panel():
         else:
             st.info("No bookings match your filters.")
 
-    # ==========================================
+    
     # TAB 2: ANALYTICS (Charts)
-    # ==========================================
+    
     with tab2:
         st.subheader("Business Intelligence")
         
         if not df_full.empty:
-            # Filter valid bookings
+         
             valid_an = df_full[df_full['Status'] != 'Cancelled']
             
             col_a, col_b = st.columns(2)
@@ -208,9 +203,9 @@ def show_admin_panel():
         else:
             st.warning("Not enough data to generate charts. Add some bookings!")
 
-    # ==========================================
+    
     # TAB 3: CUSTOMERS
-    # ==========================================
+   
     with tab3:
         st.subheader("Customer Database")
         if not df_customers.empty:
@@ -218,26 +213,68 @@ def show_admin_panel():
         else:
             st.info("No customers found.")
 
-    # ==========================================
-    # TAB 4: KNOWLEDGE BASE
-    # ==========================================
+ 
+    # TAB 4: KNOWLEDGE BASE (Manage PDFs)
+   
     with tab4:
-        st.subheader("RAG System Health")
+        st.subheader("Manage Knowledge Base")
         
         docs_dir = os.path.join(config.BASE_DIR, "docs")
-        if os.path.exists(docs_dir):
-            files = [f for f in os.listdir(docs_dir) if f.endswith('.pdf')]
-            st.write(f"**Currently Indexed PDFs ({len(files)}):**")
-            for f in files:
-                st.code(f"{f}")
-            
-            st.divider()
-            if st.button("Refresh Knowledge Base"):
-                with st.spinner("Processing new PDFs..."):
-                    rag.initialize_knowledge_base()
-                    st.success("Knowledge base updated successfully!")
+        
+       
+        if not os.path.exists(docs_dir):
+            os.makedirs(docs_dir)
+
+        # --- SECTION A: UPLOAD NEW PDF 
+        with st.expander("➕ Add New Document", expanded=False):
+            uploaded_kb_file = st.file_uploader("Upload PDF Policy or Itinerary", type="pdf", key="admin_kb_upload")
+            if uploaded_kb_file:
+                if st.button("Save to Knowledge Base"):
+                    save_path = os.path.join(docs_dir, uploaded_kb_file.name)
+                    with open(save_path, "wb") as f:
+                        f.write(uploaded_kb_file.getbuffer())
+                    st.success(f"Saved: {uploaded_kb_file.name}")
+                    
+                    
+                    with st.spinner("Updating AI Brain..."):
+                        rag.initialize_knowledge_base()
+                    st.rerun()
+
+        st.divider()
+
+        # --- SECTION B: LIST & DELETE DOCUMENTS
+        st.write("### 📚 Indexed Documents")
+        
+        files = [f for f in os.listdir(docs_dir) if f.endswith('.pdf')]
+        
+        if files:
+            for i, filename in enumerate(files):
+                col_name, col_action = st.columns([3, 1])
+                
+                with col_name:
+                    st.markdown(f"📄 **{filename}**")
+                
+                with col_action:
+                    
+                    if st.button("🗑️ Remove", key=f"del_{i}"):
+                        file_path = os.path.join(docs_dir, filename)
+                        os.remove(file_path)
+                        st.warning(f"Deleted: {filename}")
+                        
+                        
+                        with st.spinner("Re-indexing..."):
+                            rag.initialize_knowledge_base()
+                        st.rerun()
         else:
-            st.error("Docs folder missing.")
+            st.info("No documents found. Upload one above!")
+
+        st.divider()
+        
+        # Manual Force Refresh 
+        if st.button("🔄 Force Re-build Index"):
+            with st.spinner("Processing all PDFs..."):
+                rag.initialize_knowledge_base()
+                st.success("Knowledge Base Re-built successfully!")
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
